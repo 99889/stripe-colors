@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Urine Strip Analyzer</title>
+</head>
+<body>
+    <h1>Urine Strip Analyzer</h1>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="upload-input" accept="image/*" name="image_file">
+        <button id="upload-button" type="submit">Upload</button>
+    </form>
+    <div id="result-container"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/process_image/';
+
+        const uploadButton = document.querySelector('#upload-button');
+        const uploadForm = document.querySelector('#upload-form');
+        const resultContainer = document.querySelector('#result-container');
+
+        uploadForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(uploadForm);
+            fetch(API_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Display the results in the HTML
+                resultContainer.innerHTML = '';
+                Object.keys(data).forEach(color => {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.style.backgroundColor = color;
+                    colorDiv.textContent = `${color}: ${data[color]}`;
+                    resultContainer.appendChild(colorDiv);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                resultContainer.innerHTML = 'Error processing image';
+            });
+        });
+    </script>
+</body>
+</html>
